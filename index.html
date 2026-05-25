@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng Nevoirs Tool - Uptolink</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .tool-container {
+            background: linear-gradient(145deg, #2c1a3a, #1f122b);
+            border: 2px solid #ff007f;
+            border-radius: 15px;
+            padding: 25px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.2);
+        }
+
+        .tool-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .status-box {
+            background-color: #e67e22;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 200px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+        }
+
+        .status-box:hover {
+            transform: scale(1.03);
+        }
+
+        .status-box:disabled {
+            background-color: #d35400;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Trạng thái các bước màu xanh giống video */
+        .status-box.step-btn {
+            background-color: #9b59b6;
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        .reload-btn {
+            margin-top: 15px;
+            background: none;
+            border: none;
+            color: #bbb;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .reload-btn:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tool-container">
+        <div class="tool-title">Nevoirs Tool</div>
+        
+        <button id="mainActionBtn" class="status-box">BẮT ĐẦU...</button>
+        
+        <button class="reload-btn" onclick="resetTool()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Reload
+        </button>
+    </div>
+
+    <script>
+        const mainBtn = document.getElementById('mainActionBtn');
+        let currentStep = 1;
+        let countdownTimer;
+
+        // Hàm xử lý đếm ngược
+        function startCountdown(seconds, nextText, callback) {
+            mainBtn.disabled = true; // Khóa nút khi đang đếm ngược
+            mainBtn.classList.remove('step-btn');
+            
+            let timeLeft = seconds;
+            mainBtn.innerText = `VUI LÒNG ĐỢI TRONG ${timeLeft}`;
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                mainBtn.innerText = `VUI LÒNG ĐỢI TRONG ${timeLeft}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    mainBtn.disabled = false; // Mở khóa nút
+                    mainBtn.innerText = nextText;
+                    if (callback) callback();
+                }
+            }, 1000);
+        }
+
+        // Quản lý các bước (Logic hoạt động bấm nút)
+        mainBtn.addEventListener('click', () => {
+            if (currentStep === 1) {
+                // Bước 1: Sau khi bấm "Bắt đầu", đếm ngược 15 giây
+                startCountdown(15, "NHẬN LINK BẤT KỲ ĐỂ TIẾP TỤC", () => {
+                    currentStep = 2;
+                });
+            } else if (currentStep === 2) {
+                // Bước 2: Giả lập người dùng click vào link tài trợ, đổi chữ thành LẤY MÃ STEP 2
+                mainBtn.innerText = "LẤY MÃ STEP 2";
+                mainBtn.classList.add('step-btn');
+                currentStep = 3;
+            } else if (currentStep === 3) {
+                // Bước 3: Bấm lấy mã step 2 -> chuyển sang đếm ngược tiếp 15 giây (Vòng lặp step 2)
+                startCountdown(15, "NHẬN LINK BẤT KỲ ĐỂ TIẾP TỤC", () => {
+                    currentStep = 4;
+                });
+            } else if (currentStep === 4) {
+                // Bước 4: Đổi sang nút STEP 3
+                mainBtn.innerText = "LẤY MÃ STEP 3";
+                mainBtn.classList.add('step-btn');
+                currentStep = 5;
+            } else if (currentStep === 5) {
+                // Bước 5: Bấm lấy mã step 3 -> Đếm ngược chặng cuối để mở link
+                startCountdown(10, "NHẤN ĐỂ TIẾP TỤC", () => {
+                    currentStep = 6;
+                });
+            } else if (currentStep === 6) {
+                // Bấm bước cuối cùng -> Chuyển hướng tới trang đích (Uptolink Giải Captcha)
+                alert("Đang chuyển hướng tới trang Uptolink giải Captcha chính thức!");
+                window.location.href = "https://example.com/link-goc-da-qua-he-thong";
+            }
+        });
+
+        // Hàm reset lại từ đầu
+        function resetTool() {
+            clearInterval(countdownTimer);
+            currentStep = 1;
+            mainBtn.disabled = false;
+            mainBtn.classList.remove('step-btn');
+            mainBtn.innerText = "BẮT ĐẦU...";
+        }
+    </script>
+</body>
+</html>
